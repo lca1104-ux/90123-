@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蟬鳴時節的靜謐時光 — 劉宸安</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@300;400;700&family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        warm: {
+                            bg: '#FAF7F2',
+                            card: '#F4EFE6',
+                            wood: '#8C6D53',
+                            darkwood: '#4A3728',
+                            gold: '#D4A359',
+                            text: '#2C2523',
+                            sub: '#6E6259'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        kai: ['"LXGW WenKai TC"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FAF7F2;
+            color: #2C2523;
+            font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+            overflow-x: hidden;
+        }
+
+        /* 滾動條樣式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF7F2;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4A359;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8C6D53;
+        }
+
+        /* 文字流光特效 */
+        .text-gradient {
+            background: linear-gradient(135deg, #4A3728 0%, #8C6D53 50%, #D4A359 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 樹影光斑模擬特效 */
+        .sunlight-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.15;
+            background: radial-gradient(circle at 70% 20%, rgba(212, 163, 89, 0.8) 0%, transparent 50%),
+                        radial-gradient(circle at 20% 80%, rgba(140, 109, 83, 0.4) 0%, transparent 40%);
+        }
+
+        /* 滾動顯示動畫類別 */
+        .fade-in-element {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-in-element.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 紙張紋理樣式 */
+        .paper-card {
+            background: rgba(244, 239, 230, 0.85);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px -5px rgba(74, 55, 40, 0.08), 0 0 0 1px rgba(140, 109, 83, 0.12);
+        }
+
+        /* 首字下沉放大 */
+        .first-letter::first-letter {
+            font-size: 3.25em;
+            float: left;
+            line-height: 0.9;
+            margin-right: 0.15em;
+            color: #8C6D53;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen selection:bg-amber-200 selection:text-warm-darkwood">
+
+    <!-- 光斑背景層 -->
+    <div class="sunlight-container"></div>
+
+    <!-- 頂部閱讀進度條 -->
+    <div id="progress-container" class="fixed top-0 left-0 w-full h-1 z-50 bg-warm-card/50">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-warm-gold via-warm-wood to-warm-darkwood w-0 transition-all duration-150"></div>
+    </div>
+
+    <!-- 頂部浮動控制列 -->
+    <header class="fixed top-4 right-4 z-40 flex items-center gap-2 bg-warm-card/90 backdrop-blur-md px-4 py-2 rounded-full border border-warm-wood/20 shadow-md transition-all">
+        <!-- 音樂切換 -->
+        <button id="music-btn" class="flex items-center gap-2 text-warm-darkwood hover:text-warm-gold transition-colors text-sm px-2 py-1 rounded-md" title="播放/暫停 背景氛圍聲樂">
+            <i id="music-icon" class="fa-solid fa-volume-xmark"></i>
+            <span id="music-text" class="hidden sm:inline text-xs font-serif">播放背景音</span>
+        </button>
+
+        <div class="w-px h-4 bg-warm-wood/20"></div>
+
+        <!-- 字級調整 -->
+        <div class="flex items-center gap-1">
+            <button id="font-decrease" class="w-7 h-7 flex items-center justify-center text-warm-darkwood hover:text-warm-gold text-xs transition-colors rounded-full hover:bg-warm-wood/10" title="縮小字體">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+            <span id="font-size-label" class="text-xs text-warm-sub font-mono px-1">標準</span>
+            <button id="font-increase" class="w-7 h-7 flex items-center justify-center text-warm-darkwood hover:text-warm-gold text-xs transition-colors rounded-full hover:bg-warm-wood/10" title="放大字體">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主體內容區塊 -->
+    <main class="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-32">
+        
+        <!-- 文章標頭 -->
+        <section class="text-center mb-20 fade-in-element">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-warm-wood/10 text-warm-wood text-xs tracking-widest mb-6 font-serif">
+                <i class="fa-regular fa-bookmark"></i> 暑假難忘回憶錄
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold font-serif text-warm-darkwood tracking-wide leading-tight mb-4">
+                蟬鳴時節的靜謐時光
+            </h1>
+            <p class="text-lg text-warm-sub font-serif italic mb-6">
+                —— 鐫刻在老舊書桌上的夏日光景
+            </p>
+            <div class="flex items-center justify-center gap-4 text-sm text-warm-sub/80">
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-user"></i> 作者：劉宸安</span>
+                <span>•</span>
+                <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> 閱讀時間：約 3 分鐘</span>
+            </div>
+        </section>
+
+        <!-- 引言/前言 Section -->
+        <section class="mb-16 fade-in-element">
+            <div class="paper-card p-8 md:p-10 rounded-2xl relative overflow-hidden">
+                <div class="absolute -top-4 -left-4 text-warm-gold/20 text-8xl font-serif select-none">“</div>
+                <p id="content-intro" class="first-letter text-lg md:text-xl text-warm-text leading-relaxed tracking-wide relative z-10">
+                    炙熱的蟬鳴拉開了兩個月暑期的序幕，對許多人而言，快樂的暑假往往與主題樂園的歡笑、出國旅遊的驚喜或涼爽的水上活動劃上等號。然而，我心中最深沉且持久的快樂，卻鐫刻在一段沉靜無言的時光裡——那是我與老舊書桌、幾本經典文學交織出的暑期光景。
+                </p>
+            </div>
+        </section>
+
+        <!-- 文章章節 1: 迷惘與空白 -->
+        <section class="mb-16 fade-in-element">
+            <div class="flex items-center gap-4 mb-6">
+                <span class="text-xs tracking-widest font-mono text-warm-gold uppercase bg-warm-gold/10 px-3 py-1 rounded">Chapter 01</span>
+                <h2 class="text-2xl font-bold font-serif text-warm-darkwood">迷惘與空白</h2>
+                <div class="flex-1 h-px bg-warm-wood/20"></div>
+            </div>
+            
+            <div class="paper-card p-8 md:p-10 rounded-2xl">
+                <p id="content-p1" class="text-lg md:text-xl text-warm-text leading-relaxed tracking-wide mb-6">
+                    那是一個沒有安排密集補習與遠途旅行的夏天。午後的陽光透過窗欞，將斑駁的樹影投射在木質桌面，室內瀰漫著淡淡的墨香與陳年紙張的氣味。
+                </p>
+                <p id="content-p2" class="text-lg md:text-xl text-warm-text leading-relaxed tracking-wide">
+                    起初，面對突如其來的漫長空白，我也曾感到焦躁與不安，習慣了被緊湊課業推著走的節奏，驟然停下腳步反而令人茫然。直到我隨手翻開堆疊在桌角的那本小說，文字如同一道清泉，緩緩流淌進充斥著喧囂的心田。
+                </p>
+            </div>
+        </section>
+
+        <!-- 意境插畫／金句卡片 -->
+        <section class="my-20 fade-in-element">
+            <div class="relative p-10 rounded-2xl bg-gradient-to-br from-warm-wood to-warm-darkwood text-warm-bg shadow-xl text-center overflow-hidden">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <i class="fa-solid fa-book-open text-4xl text-warm-gold/60 mb-4 block"></i>
+                <blockquote class="text-xl md:text-2xl font-serif font-medium leading-loose tracking-wider mb-4">
+                    「文字如同一道清泉，緩緩流淌進充斥著喧囂的心田。」
+                </blockquote>
+                <div class="w-12 h-0.5 bg-warm-gold mx-auto my-4 opacity-60"></div>
+                <p class="text-xs text-warm-bg/70 tracking-widest">文字對話 • 重新審視內心</p>
+            </div>
+        </section>
+
+        <!-- 文章章節 2: 靈魂的對話 -->
+        <section class="mb-16 fade-in-element">
+            <div class="flex items-center gap-4 mb-6">
+                <span class="text-xs tracking-widest font-mono text-warm-gold uppercase bg-warm-gold/10 px-3 py-1 rounded">Chapter 02</span>
+                <h2 class="text-2xl font-bold font-serif text-warm-darkwood">靈魂的對話</h2>
+                <div class="flex-1 h-px bg-warm-wood/20"></div>
+            </div>
+
+            <div class="paper-card p-8 md:p-10 rounded-2xl">
+                <p id="content-p3" class="text-lg md:text-xl text-warm-text leading-relaxed tracking-wide mb-6">
+                    在那個炎熱的暑假裡，我不再是為了考試而閱讀，而是純粹為了探索靈魂的深度。我跟隨書中的人物走過荒涼的大漠，體驗不同的生命悲喜，甚至在孤獨的文字對話中，重新審視了自己的內心世界。
+                </p>
+                <p id="content-p4" class="text-lg md:text-xl text-warm-text leading-relaxed tracking-wide">
+                    我不必在意鐘聲何時響起，也不必計算分數的高低，時間彷彿在頁碼的翻動間變得寬廣而富有彈性。那種擺脫世俗評價、與自己深刻對話的自由感，帶來了一種前所未有的安寧與滿足。
+                </p>
+            </div>
+        </section>
+
+        <!-- 文章章節 3: 精神的滋養 -->
+        <section class="mb-16 fade-in-element">
+            <div class="flex items-center gap-4 mb-6">
+                <span class="text-xs tracking-widest font-mono text-warm-gold uppercase bg-warm-gold/10 px-3 py-1 rounded">Chapter 03</span>
+                <h2 class="text-2xl font-bold font-serif text-warm-darkwood">精神的滋養</h2>
+                <div class="flex-1 h-px bg-warm-wood/20"></div>
+            </div>
+
+            <div class="paper-card p-8 md:p-10 rounded-2xl">
+                <p id="content-p5" class="text-lg md:text-xl text-warm-text leading-relaxed tracking-wide mb-6">
+                    當暑假漸入尾聲，開學的腳步逼近，我發現自己帶走的不是幾張遊樂園的門票，而是一顆變得更加平靜且充實的心靈。
+                </p>
+                <p id="content-p6" class="text-lg md:text-xl text-warm-text leading-relaxed tracking-wide">
+                    快樂未必來自外在刺激的極致享受，更多時候，它源於內心獲得的滋養與沉澱。那段看似安靜無華的閱讀時光，成為我青春記憶中最亮麗的一抹色彩，也在日後的繁重學業中，持續為我提供源源不絕的精神能量。
+                </p>
+            </div>
+        </section>
+
+        <!-- 結尾落款與分享 -->
+        <footer class="mt-20 pt-8 border-t border-warm-wood/20 text-center fade-in-element">
+            <div class="font-serif text-xl text-warm-darkwood mb-2 font-bold">劉宸安 筆</div>
+            <p class="text-sm text-warm-sub mb-8">記錄於夏末的閱讀角落</p>
+
+            <div class="flex justify-center items-center gap-4">
+                <button onclick="copyToClipboard()" class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-warm-wood text-warm-bg hover:bg-warm-darkwood transition-colors shadow-md text-sm font-serif">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>複製文章連結</span>
+                </button>
+            </div>
+            <!-- 提示彈窗 -->
+            <div id="toast" class="opacity-0 pointer-events-none fixed bottom-8 left-1/2 -translate-x-1/2 bg-warm-darkwood text-warm-bg px-4 py-2 rounded-lg text-sm shadow-lg transition-all duration-300 z-50">
+                網址已成功複製至剪貼簿！
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript 互動邏輯 -->
+    <script>
+        // --- 1. 滾動進度條與滾動顯示動畫 ---
+        window.addEventListener('scroll', () => {
+            // 進度條
+            const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + '%';
+        });
+
+        // Intersection Observer 實現動態滾動漸顯
+        const observerOptions = {
+            root: null,
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-element').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- 2. 字體大小動態調節 ---
+        const fontSizes = ['text-base', 'text-lg', 'text-xl', 'text-2xl'];
+        const fontSizeNames = ['精小', '標準', '放大', '特大'];
+        let currentSizeIdx = 1; // 預設 text-lg (標準)
+
+        const textElements = [
+            document.getElementById('content-intro'),
+            document.getElementById('content-p1'),
+            document.getElementById('content-p2'),
+            document.getElementById('content-p3'),
+            document.getElementById('content-p4'),
+            document.getElementById('content-p5'),
+            document.getElementById('content-p6')
+        ];
+
+        const fontLabel = document.getElementById('font-size-label');
+        const btnIncrease = document.getElementById('font-increase');
+        const btnDecrease = document.getElementById('font-decrease');
+
+        function updateFontSize() {
+            textElements.forEach(el => {
+                if (!el) return;
+                // 移除現有的字級大小 class
+                fontSizes.forEach(cls => {
+                    el.classList.remove(cls);
+                    el.classList.remove('md:' + cls);
+                });
+                // 套用新的字級大小 class
+                el.classList.add(fontSizes[currentSizeIdx]);
+            });
+            fontLabel.textContent = fontSizeNames[currentSizeIdx];
+        }
+
+        btnIncrease.addEventListener('click', () => {
+            if (currentSizeIdx < fontSizes.length - 1) {
+                currentSizeIdx++;
+                updateFontSize();
+            }
+        });
+
+        btnDecrease.addEventListener('click', () => {
+            if (currentSizeIdx > 0) {
+                currentSizeIdx--;
+                updateFontSize();
+            }
+        });
+
+        // --- 3. Web Audio API 模擬輕柔音效與微弱蟬鳴/鋼琴氛圍 ---
+        let audioCtx = null;
+        let isPlaying = false;
+        let masterGain = null;
+        let timerId = null;
+
+        const musicBtn = document.getElementById('music-btn');
+        const musicIcon = document.getElementById('music-icon');
+        const musicText = document.getElementById('music-text');
+
+        function initAudio() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            masterGain.connect(audioCtx.destination);
+        }
+
+        // 播放隨機和緩微音 (模擬清脆鋼琴彈奏)
+        function playSoftNote() {
+            if (!isPlaying || !audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const noteGain = audioCtx.createGain();
+
+            // 五聲音階暖調頻率 (C Major / A Minor pentatonic 柔和音階)
+            const frequencies = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 659.25];
+            const randomFreq = frequencies[Math.floor(Math.random() * frequencies.length)];
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(randomFreq, audioCtx.currentTime);
+
+            noteGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            noteGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+            noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.5);
+
+            osc.connect(noteGain);
+            noteGain.connect(masterGain);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 3.6);
+
+            // 隨機下一個音符間隔
+            const nextTime = Math.random() * 2500 + 1500;
+            timerId = setTimeout(playSoftNote, nextTime);
+        }
+
+        // 切換背景音樂狀態
+        musicBtn.addEventListener('click', () => {
+            if (!audioCtx) {
+                initAudio();
+            }
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (!isPlaying) {
+                isPlaying = true;
+                musicIcon.className = "fa-solid fa-volume-high text-warm-gold";
+                musicText.textContent = "播放中";
+                playSoftNote();
+            } else {
+                isPlaying = false;
+                musicIcon.className = "fa-solid fa-volume-xmark";
+                musicText.textContent = "播放背景音";
+                if (timerId) clearTimeout(timerId);
+            }
+        });
+
+        // --- 4. 複製連結功能 ---
+        function copyToClipboard() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
